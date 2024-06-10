@@ -70,5 +70,15 @@ pipeline {
                 }
             }
         }
+        stage('Destroy Infrastructure') {
+    when {
+        expression { params.DESTROY_INFRA }
+    }
+    steps {
+        script {
+            dir('EKS') {
+                sh 'terraform destroy -auto-approve'
+            }
+        }
     }
 }
