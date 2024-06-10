@@ -51,14 +51,15 @@ pipeline {
             }
         }
         stage('Creating/Destroying an EKS Cluster'){
-            steps{
-                script{
-                    dir('EKS') {
-                        sh 'terraform $action apply --auto-approve'
-                }
+    steps{
+        script{
+            dir('EKS') {
+                def action = params.DESTROY_INFRA ? 'destroy' : 'apply'
+                sh "terraform ${action} --auto-approve"
             }
         }
     }
+}
     stage('Deploying Application') {
         steps{
             script{
