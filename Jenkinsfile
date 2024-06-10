@@ -55,30 +55,30 @@ pipeline {
                 script{
                     dir('EKS') {
                         sh 'terraform $action apply --auto-approve'
-                    }
                 }
             }
         }
-        stage('Deploying Application') {
-            steps{
-                script{
-                    dir('EKS/ConfigurationFiles') {
-                        sh 'aws eks update-kubeconfig --name my-eks-cluster'
-                        sh 'kubectl apply -f deployment.yaml'
-                        sh 'kubectl apply -f service.yaml'
-                    }
+    }
+    stage('Deploying Application') {
+        steps{
+            script{
+                dir('EKS/ConfigurationFiles') {
+                    sh 'aws eks update-kubeconfig --name my-eks-cluster'
+                    sh 'kubectl apply -f deployment.yaml'
+                    sh 'kubectl apply -f service.yaml'
                 }
             }
         }
-        stage('Destroy Infrastructure') {
-    when {
-        expression { params.DESTROY_INFRA }
     }
-    steps {
-        script {
-            dir('EKS') {
-                sh 'terraform destroy -auto-approve'
+    stage('Destroy Infrastructure') {
+        when {
+            expression { params.DESTROY_INFRA }
+        }
+        steps {
+            script {
+                dir('EKS') {
+                    sh 'terraform destroy -auto-approve'
+                }
             }
         }
     }
-}
