@@ -52,34 +52,37 @@ pipeline {
         }
         stage('Creating/Destroying an EKS Cluster') {
             steps {
-    script {
-        dir('EKS') {
-            def action = params.DESTROY_INFRA ? 'destroy' : 'apply'
-            sh "terraform ${action} --auto-approve"
-        }
-    }
-}
-stage('Deploying Application') {
-    steps {
-        script {
-            withCredentials([aws(credentialsId: 'aws-credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-                dir('EKS/ConfigurationFiles') {
-                    sh 'aws eks update-kubeconfig --name my-eks-cluster'
-                    sh 'kubectl apply -f deployment.yaml --validate=false'
-                    sh 'kubectl apply -f service.yaml --validate=false'
+                script {
+                    dir('EKS') {
+                        def action = params.DESTROY_INFRA ? 'destroy' : 'apply'
+                        sh "terraform ${action} --auto-approve"
+                    }
                 }
             }
         }
-    }
-}
-stage('Destroy Infrastructure') {
-    when {
-        expression { params.DESTROY_INFRA }
-    }
-    steps {
-        script {
-            dir('EKS') {
-                sh 'terraform destroy -auto-approve'
+        stage('Deploying Application') {
+            steps {
+                script {
+                    withCredentials([aws(credentialsId: 'aws-credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                        dir('EKS/ConfigurationFiles') {
+                            sh 'aws eks update-kubeconfig --name my-eks-cluster'
+                            sh 'kubectl apply -f deployment.yaml --validate=false'
+                            sh 'kubectl apply -f service.yaml --validate=false'
+                        }
+                    }
+                }
+            }
+        }
+        stage('Destroy Infrastructure') {
+            when {
+                expression { params.DESTROY_INFRA }
+            }
+            steps {
+                script {
+                    dir('EKS') {
+                        sh 'terraform destroy -auto-approve'
+                    }
+                }
             }
         }
     }
