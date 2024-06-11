@@ -46,7 +46,7 @@ pipeline {
                     dir('EKS') {
                         sh 'terraform plan'
                     }
-                    //input(message: "Are you sure to proceed?", ok: "Proceed")
+                    input(message: "Are you sure to proceed?", ok: "Proceed")
                 }
             }
         }
@@ -66,8 +66,10 @@ pipeline {
                     withCredentials([aws(credentialsId: 'aws-credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                         dir('EKS/ConfigurationFiles') {
                             sh 'aws eks update-kubeconfig --name my-eks-cluster'
-                            sh 'kubectl apply -f deployment.yaml '
-                            sh 'kubectl apply -f service.yaml '
+                            sh 'kubectl config view'
+                            sh 'kubectl get nodes'
+                            sh 'kubectl apply -f deployment.yaml --validate=false'
+                            sh 'kubectl apply -f service.yaml --validate=false'
                         }
                     }
                 }
