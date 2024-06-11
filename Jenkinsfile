@@ -52,15 +52,14 @@ pipeline {
         }
         stage('Creating/Destroying an EKS Cluster') {
             steps {
-                script {
-                    dir('EKS') {
-                        def action = params.DESTROY_INFRA ? 'destroy' : 'apply'
-                        sh "terraform ${action} --auto-approve"
-                    }
-                }
-            }
+    script {
+        dir('EKS') {
+            def action = params.DESTROY_INFRA ? 'destroy' : 'apply'
+            sh "terraform ${action} --auto-approve"
         }
-       stage('Deploying Application') {
+    }
+}
+stage('Deploying Application') {
     steps {
         script {
             withCredentials([aws(credentialsId: 'aws-credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
@@ -71,16 +70,16 @@ pipeline {
                 }
             }
         }
-        stage('Destroy Infrastructure') {
-            when {
-                expression { params.DESTROY_INFRA }
-            }
-            steps {
-                script {
-                    dir('EKS') {
-                        sh 'terraform destroy -auto-approve'
-                    }
-                }
+    }
+}
+stage('Destroy Infrastructure') {
+    when {
+        expression { params.DESTROY_INFRA }
+    }
+    steps {
+        script {
+            dir('EKS') {
+                sh 'terraform destroy -auto-approve'
             }
         }
     }
