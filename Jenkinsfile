@@ -60,14 +60,14 @@ pipeline {
                 }
             }
         }
-        stage('Deploying Application') {
-            steps {
-                script {
-                    dir('EKS/ConfigurationFiles') {
-                        sh 'aws eks update-kubeconfig --name my-eks-cluster'
-                        sh 'kubectl apply -f deployment.yaml --validate=false'
-                        sh 'kubectl apply -f service.yaml --validate=false'
-                    }
+       stage('Deploying Application') {
+    steps {
+        script {
+            withCredentials([aws(credentialsId: 'aws-credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                dir('EKS/ConfigurationFiles') {
+                    sh 'aws eks update-kubeconfig --name my-eks-cluster'
+                    sh 'kubectl apply -f deployment.yaml --validate=false'
+                    sh 'kubectl apply -f service.yaml --validate=false'
                 }
             }
         }
